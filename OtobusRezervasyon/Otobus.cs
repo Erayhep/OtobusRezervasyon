@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -23,8 +24,10 @@ namespace Otobilet
 
         private void OtobusleriGoster()
         {
-            string Query = "select * from OtobusTbl";
-            OtobusDgv.DataSource = Con.GetData(Query);
+            string query = "SELECT * FROM OtobusTbl";  // Otobüs tablosundan veri çekme sorgusu
+            DataTable dt = Con.GetData(query);  // Parametreli GetData metodunu çağırıyoruz (string parametre)
+
+            OtobusDgv.DataSource = dt;  // DataGridView'e veri bağlama
         }
 
         private void Temizle()

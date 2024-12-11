@@ -76,7 +76,7 @@
             label10.ForeColor = SystemColors.ControlDarkDark;
             label10.Location = new Point(40, 139);
             label10.Name = "label10";
-            label10.Size = new Size(74, 26);
+            label10.Size = new Size(59, 22);
             label10.TabIndex = 15;
             label10.Text = "Otobüs";
             // 
@@ -112,7 +112,7 @@
             label4.ForeColor = SystemColors.ControlDarkDark;
             label4.Location = new Point(251, 139);
             label4.Name = "label4";
-            label4.Size = new Size(112, 26);
+            label4.Size = new Size(88, 22);
             label4.TabIndex = 47;
             label4.Text = "Sefer Günü";
             // 
@@ -122,7 +122,7 @@
             STarihDtp.Location = new Point(251, 178);
             STarihDtp.Margin = new Padding(3, 4, 3, 4);
             STarihDtp.Name = "STarihDtp";
-            STarihDtp.Size = new Size(184, 31);
+            STarihDtp.Size = new Size(184, 26);
             STarihDtp.TabIndex = 46;
             // 
             // SeferSaatCmb
@@ -130,7 +130,7 @@
             SeferSaatCmb.FormattingEnabled = true;
             SeferSaatCmb.Location = new Point(163, 353);
             SeferSaatCmb.Name = "SeferSaatCmb";
-            SeferSaatCmb.Size = new Size(155, 34);
+            SeferSaatCmb.Size = new Size(155, 30);
             SeferSaatCmb.TabIndex = 45;
             // 
             // OtobusCmb
@@ -139,7 +139,7 @@
             OtobusCmb.Items.AddRange(new object[] { " Adana", " Adıyaman", " Afyonkarahisar", " Ağrı", " Aksaray", " Amasya", " Ankara", " Antalya", " Ardahan", " Artvin", " Aydın", " Balıkesir", " Bartın", " Batman", " Bayburt", " Bilecik", " Bingöl", " Bitlis", " Bolu", " Burdur", " Bursa", " Çanakkale", " Çankırı", " Çorum", " Denizli", " Diyarbakır", " Düzce", " Edirne", " Elazığ", " Erzincan", " Erzurum", " Eskişehir", " Gaziantep", " Giresun", " Gümüşhane", " Hakkâri", " Hatay", " Iğdır", " Isparta", " İstanbul", " İzmir", " Kahramanmaraş", " Karabük", " Karaman", " Kars", " Kastamonu", " Kayseri", " Kilis", " Kırıkkale", " Kırklareli", " Kırşehir", " Kocaeli", " Konya", " Kütahya", " Malatya", " Manisa", " Mardin", " Mersin", " Muğla", " Muş", " Nevşehir", " Niğde", " Ordu", " Osmaniye", " Rize", " Sakarya", " Samsun", " Şanlıurfa", " Siirt", " Sinop", " Sivas", " Şırnak", " Tekirdağ", " Tokat", " Trabzon", " Tunceli", " Uşak", " Van", " Yalova", " Yozgat", " Zonguldak" });
             OtobusCmb.Location = new Point(39, 172);
             OtobusCmb.Name = "OtobusCmb";
-            OtobusCmb.Size = new Size(184, 34);
+            OtobusCmb.Size = new Size(184, 30);
             OtobusCmb.TabIndex = 44;
             // 
             // NereyeCmb
@@ -147,7 +147,7 @@
             NereyeCmb.FormattingEnabled = true;
             NereyeCmb.Location = new Point(242, 284);
             NereyeCmb.Name = "NereyeCmb";
-            NereyeCmb.Size = new Size(195, 34);
+            NereyeCmb.Size = new Size(195, 30);
             NereyeCmb.TabIndex = 43;
             // 
             // NeredenCmb
@@ -155,7 +155,7 @@
             NeredenCmb.FormattingEnabled = true;
             NeredenCmb.Location = new Point(40, 284);
             NeredenCmb.Name = "NeredenCmb";
-            NeredenCmb.Size = new Size(183, 34);
+            NeredenCmb.Size = new Size(183, 30);
             NeredenCmb.TabIndex = 42;
             // 
             // label8
@@ -165,7 +165,7 @@
             label8.ForeColor = SystemColors.ControlDarkDark;
             label8.Location = new Point(242, 246);
             label8.Name = "label8";
-            label8.Size = new Size(76, 26);
+            label8.Size = new Size(61, 22);
             label8.TabIndex = 41;
             label8.Text = "Nereye";
             // 
@@ -199,7 +199,7 @@
             label11.ForeColor = Color.ForestGreen;
             label11.Location = new Point(53, 48);
             label11.Name = "label11";
-            label11.Size = new Size(355, 38);
+            label11.Size = new Size(283, 29);
             label11.TabIndex = 35;
             label11.Text = "Nereye Gitmek İstersin?";
             // 
@@ -209,7 +209,7 @@
             sefersaat.ForeColor = SystemColors.ControlDarkDark;
             sefersaat.Location = new Point(39, 356);
             sefersaat.Name = "sefersaat";
-            sefersaat.Size = new Size(118, 26);
+            sefersaat.Size = new Size(94, 22);
             sefersaat.TabIndex = 19;
             sefersaat.Text = "Sefer Saati:";
             // 
@@ -231,7 +231,7 @@
             label9.Font = new Font("Trebuchet MS", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 162);
             label9.Location = new Point(119, 444);
             label9.Name = "label9";
-            label9.Size = new Size(29, 35);
+            label9.Size = new Size(23, 27);
             label9.TabIndex = 2;
             label9.Text = "+";
             // 
@@ -254,7 +254,7 @@
             label6.ForeColor = SystemColors.ControlDarkDark;
             label6.Location = new Point(40, 246);
             label6.Name = "label6";
-            label6.Size = new Size(88, 26);
+            label6.Size = new Size(70, 22);
             label6.TabIndex = 6;
             label6.Text = "Nereden";
             // 
@@ -265,7 +265,7 @@
             label1.ForeColor = Color.White;
             label1.Location = new Point(50, 10);
             label1.Name = "label1";
-            label1.Size = new Size(389, 29);
+            label1.Size = new Size(305, 24);
             label1.TabIndex = 48;
             label1.Text = "Otobüs Bilet Rezervasyon Yönetimi";
             // 
@@ -275,7 +275,7 @@
             label3.Font = new Font("Trebuchet MS", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 162);
             label3.Location = new Point(5, 1);
             label3.Name = "label3";
-            label3.Size = new Size(29, 35);
+            label3.Size = new Size(23, 27);
             label3.TabIndex = 1;
             label3.Text = "+";
             // 
@@ -285,7 +285,7 @@
             label2.Font = new Font("Trebuchet MS", 12F, FontStyle.Regular, GraphicsUnit.Point, 162);
             label2.Location = new Point(31, 8);
             label2.Name = "label2";
-            label2.Size = new Size(141, 26);
+            label2.Size = new Size(112, 22);
             label2.TabIndex = 0;
             label2.Text = "Bilet Yönetimi";
             // 
@@ -377,7 +377,7 @@
             // 
             // Yolcular
             // 
-            AutoScaleDimensions = new SizeF(11F, 26F);
+            AutoScaleDimensions = new SizeF(9F, 22F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.WindowFrame;
             ClientSize = new Size(1582, 853);

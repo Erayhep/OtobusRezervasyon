@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using OtobusYonetimi;
 using OtobusRezervasyon;
+using System.Data.SqlClient;
 
 namespace Otobilet
 {
@@ -45,20 +46,23 @@ namespace Otobilet
 
         private void FillOtobusCmb()
         {
-            string query = "SELECT OKod, Otobus FROM OtobusTbl";
-            DataTable dt = Con.GetData(query);  // Veritabanından otobüs verilerini çek
-            SOtobusCmb.DataSource = dt;
+            string query = "SELECT OKod, Otobus FROM OtobusTbl";  // Otobüs tablosundan veri çekme sorgusu
+            DataTable dt = Con.GetData(query);
+
+            SOtobusCmb.DataSource = dt;  // ComboBox'a verileri yerleştiriyoruz
             SOtobusCmb.DisplayMember = "Otobus";  // ComboBox'ta görünen değer
             SOtobusCmb.ValueMember = "OKod";     // ComboBox'ta saklanan (gizli) değer (OKod, otobüsün ID'si)
+
         }
 
         private void FillSoforCmb()
         {
-            string query = "SELECT SKod, SoforAd FROM SoforTbl";
-            DataTable dt = Con.GetData(query);  // Veritabanından şoför verilerini çek
-            SSoforCmb.DataSource = dt;
+            string query = "SELECT SKod, SoforAd FROM SoforTbl";  // Şoför tablosundan veri çekme sorgusu
+            DataTable dt = Con.GetData(query);  // Direkt sorgu string'i gönderiliyor
+
+            SSoforCmb.DataSource = dt;  // ComboBox'a verileri yerleştiriyoruz
             SSoforCmb.DisplayMember = "SoforAd";  // ComboBox'ta görünen değer
-            SSoforCmb.ValueMember = "SKod";       // ComboBox'ta saklanan (gizli) değer
+            SSoforCmb.ValueMember = "SKod";       // ComboBox'ta saklanan (gizli) değer (SKod, şoförün ID'si)
         }
         private void Sefer_Load(object sender, EventArgs e)
         {
@@ -131,30 +135,65 @@ namespace Otobilet
             {
                 try
                 {
-                    string SOtobus = SOtobusCmb.Text;
-                    string SSofor = SSoforCmb.Text;
-                    int SFiyat = Convert.ToInt32(SFiyatMtb.Text);
-                    string SNereden = SNeredenCmb.Text;
-                    string SNereye = SNereyeCmb.Text;
-                    string SSaat = SSaatMtb.Text;
-                    DateTime STarih = STarihDtp.Value;
+                    string SOtobus = SOtobusCmb.Text;  // Otobüs adı
+                    string SSofor = SSoforCmb.Text;    // Şoför adı
+                    int SFiyat = Convert.ToInt32(SFiyatMtb.Text);  // Fiyat bilgisi
+                    string SNereden = SNeredenCmb.Text;  // Nereden
+                    string SNereye = SNereyeCmb.Text;   // Nereye
+                    string SSaat = SSaatMtb.Text;       // Sefer saati
+                    DateTime STarih = STarihDtp.Value;  // Sefer tarihi
 
-                    // Sefer tablosu güncelleme sorgusu
-                    string Query = "UPDATE SeferTbl SET Otobus = '{0}', SoforAd = '{1}', Fiyat = {2}, Nereden = '{3}', Nereye = '{4}', Sefer_Saat = '{5}', Sefer_Tarih = '{6}' WHERE SEKod = {7}";
-                    Query = string.Format(Query, SOtobus, SSofor, SFiyat, SNereden, SNereye, SSaat, STarih.ToString("yyyy-MM-dd"), Key);
+                    // Otobüsün ID'sini almak için sorgu yazıyoruz (parametreli sorgu)
+                    string otobusQuery = "SELECT OKod FROM OtobusTbl WHERE Otobus = @Otobus";
 
-                    // Veritabanına sorguyu gönder
-                    Con.setData(Query);
-                    MessageBox.Show("Sefer Güncellendi!");
-                    SeferleriGoster();  // Güncellenen verileri göster
-                    Temizle();  // Formu temizle
+                    // Otobüs verisini almak için parametre ekliyoruz
+                    SqlParameter[] parameters = new SqlParameter[]
+                    {
+        new SqlParameter("@Otobus", SOtobus)
+                    };
+
+                    // Otobüs verisini alıyoruz
+                    DataTable otobusDt = Con.GetData(otobusQuery, parameters);  // Veriyi çekiyoruz
+
+                    // Eğer otobüs bulunursa, güncellemeyi yapıyoruz
+                    if (otobusDt.Rows.Count > 0)
+                    {
+                        int otobusID = Convert.ToInt32(otobusDt.Rows[0]["OKod"]);  // Otobüs ID'si
+
+                        // Sefer tablosu güncelleme sorgusu
+                        string Query = "UPDATE SeferTbl SET Otobus = @Otobus, SoforAd = @SoforAd, Fiyat = @Fiyat, Nereden = @Nereden, Nereye = @Nereye, Sefer_Saat = @SeferSaat, Sefer_Tarih = @SeferTarih WHERE SEKod = @SEKod";
+
+                        // Parametreler
+                        SqlParameter[] updateParameters = new SqlParameter[]
+                        {
+            new SqlParameter("@Otobus", otobusID),
+            new SqlParameter("@SoforAd", SSofor),
+            new SqlParameter("@Fiyat", SFiyat),
+            new SqlParameter("@Nereden", SNereden),
+            new SqlParameter("@Nereye", SNereye),
+            new SqlParameter("@SeferSaat", SSaat),
+            new SqlParameter("@SeferTarih", STarih.ToString("yyyy-MM-dd")),
+            new SqlParameter("@SEKod", Key)  // Key'yi parametre olarak ekledik
+                        };
+
+                        // Veritabanına sorguyu gönder
+                        Con.setData(Query, updateParameters);  // Veritabanına güncelleme sorgusunu gönderiyoruz
+
+                        MessageBox.Show("Sefer Güncellendi!");
+                        SeferleriGoster();  // Güncellenen verileri göster
+                        Temizle();  // Formu temizle
+                    }
+                    else
+                    {
+                        MessageBox.Show("Seçilen otobüs bulunamadı!");
+                    }
                 }
                 catch (Exception Ex)
                 {
-                    MessageBox.Show($"Bir hata oluştu: {Ex.Message}\nLütfen destek ekibiyle iletişime geçin.");
+                    MessageBox.Show($"Bir hata oluştu: {Ex.Message}\nLütfen destek ekibiyle iletişime geçin.");
                 }
             }
-        }
+            }
 
         private void SSilBtn_Click(object sender, EventArgs e)
         {

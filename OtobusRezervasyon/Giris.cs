@@ -21,6 +21,9 @@ namespace Otobilet
             this.FormClosing += new FormClosingEventHandler(this.Giris_FormClosing);
         }
 
+        // Giriş yapan kullanıcının ID'sini tutmak için bir değişken
+        public string UserID { get; private set; }
+
         private void GirisBtn_Click(object sender, EventArgs e)
         {
             string eposta = KadiTb.Text.Trim();
@@ -34,18 +37,20 @@ namespace Otobilet
 
             try
             {
-                // Kullanıcının rolünü doğrula
-                string rol = KullaniciDogrulaVeRolAl(eposta, sifre);
+                // Kullanıcıyı doğrula ve kullanıcı ID'sini al
+                var (rol, userId) = KullaniciDogrula(eposta, sifre);
 
                 if (!string.IsNullOrEmpty(rol))
                 {
+                    UserID = userId; // Kullanıcı ID'sini sakla
+
                     if (rol == "Admin")
                     {
                         MessageBox.Show("Admin olarak giriş yapıldı!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         // Admin ekranına yönlendirme
                         this.Hide();
-                        Otobus adminForm = new Otobus(); // Admin ekranını aç
+                        Otobus adminForm = new Otobus();
                         adminForm.Show();
                     }
                     else if (rol == "Kullanıcı")
@@ -54,7 +59,8 @@ namespace Otobilet
 
                         // Kullanıcı ekranına yönlendirme
                         this.Hide();
-                        Soforler anaSayfa = new Soforler(); // Kullanıcı ekranını aç BİLET SATIN AL EKRANI
+                        BiletAL anaSayfa = new BiletAL();
+                        anaSayfa.UserID = userId; // Kullanıcı ID'sini aktar
                         anaSayfa.Show();
                     }
                 }
@@ -67,44 +73,43 @@ namespace Otobilet
             {
                 MessageBox.Show($"Giriş sırasında bir hata oluştu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
         }
 
-        private string KullaniciDogrulaVeRolAl(string eposta, string sifre)
+        // Kullanıcıyı doğrula ve hem rol hem de kullanıcı ID'sini al
+        private (string Rol, string UserID) KullaniciDogrula(string eposta, string sifre)
         {
-            string rol = null; // Varsayılan olarak boş
+            string rol = null;
+            string userId = null;
 
             string connectionString = @"Data Source=DESKTOP-LDVGBVA\SQLEXPRESS;Initial Catalog=OtobiletDb;Integrated Security=True;";
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "SELECT Rol FROM KayitTbl WHERE Eposta = @Eposta AND Parola = @Parola";
+                string query = "SELECT Rol, UserID FROM KayitTbl WHERE Eposta = @Eposta AND Parola = @Parola";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@Eposta", eposta);
-                    cmd.Parameters.AddWithValue("@Parola", sifre); // Düz metin olarak kontrol ediliyor
+                    cmd.Parameters.AddWithValue("@Parola", sifre);
 
-                    object result = cmd.ExecuteScalar();
-                    if (result != null)
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        rol = result.ToString(); // Rol değerini al
+                        if (reader.Read())
+                        {
+                            rol = reader["Rol"].ToString();
+                            userId = reader["UserID"].ToString();
+                        }
                     }
                 }
             }
-            return rol;
+            return (rol, userId);
         }
         private void Giris_Load(object sender, EventArgs e)
         {
 
         }
-        //private void Giris_FormClosing(object sender, FormClosingEventArgs e)
-        //{
-        //        Application.Exit(); // Uygulamayı tamamen kapatır
-        //}
         private void Giris_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // Burada uygulama kapanmadan önce yapılacak işlemleri ekleyebilirsiniz
-            // Örneğin, kullanıcıdan onay almak için bir MessageBox ekleyebiliriz:
-
             DialogResult result = MessageBox.Show("Uygulamayı kapatmak istediğinizden emin misiniz?", "Kapat", MessageBoxButtons.YesNo);
             if (result == DialogResult.No)
             {

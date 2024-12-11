@@ -71,7 +71,7 @@ namespace OtobusYonetimi
                 MessageBox.Show($"Sefer seçildi! Sefer ID: {selectedSeferID}");
 
                 // Burada seçilen sefer bilgilerini başka bir forma aktarabilirsiniz
-                Rezervasyonlar rezervasyonForm = new Rezervasyonlar(); // Örnek bir form oluşturma
+                Detaylar rezervasyonForm = new Detaylar(selectedSeferID);
                 rezervasyonForm.Show();
                 this.Hide();
             }
@@ -85,75 +85,32 @@ namespace OtobusYonetimi
         {
             try
             {
+
                 string baseQuery = @"SELECT S.SEKod, S.Sefer_Saat, S.Sefer_Tarih, O.Otobus, 
                      S.Nereden, S.Nereye, S.SoforAd AS SoforAd
                      FROM SeferTbl S
                      JOIN OtobusTbl O ON S.Otobus = O.OKod
                      WHERE 1=1";
 
-                // Otobus filtresi
-                if (OtobusCmb.SelectedValue != null && OtobusCmb.SelectedValue is int)
-                {
-                    baseQuery += " AND O.OKod = " + OtobusCmb.SelectedValue;
-                }
-
-                // Nereden filtresi
-                if (!string.IsNullOrEmpty(NeredenCmb.Text))
-                {
-                    baseQuery += $" AND S.Nereden COLLATE SQL_Latin1_General_CP1_CI_AS LIKE '%{NeredenCmb.Text}%'";
-                }
-
-                // Nereye filtresi
-                if (!string.IsNullOrEmpty(NereyeCmb.Text))
-                {
-                    baseQuery += $" AND S.Nereye COLLATE SQL_Latin1_General_CP1_CI_AS LIKE '%{NereyeCmb.Text}%'";
-                }
-
-                // Sefer saat filtresi
-                if (!string.IsNullOrEmpty(SeferSaatCmb.Text))
-                {
-                    baseQuery += $" AND S.Sefer_Saat = '{SeferSaatCmb.Text}'";
-                }
-
-                // Tarih filtresi
-                baseQuery += $" AND CONVERT(DATE, S.Sefer_Tarih) = '{STarihDtp.Value.ToString("yyyy-MM-dd")}'";
-
-                // Debug: Sorguyu MessageBox ile göster
-                MessageBox.Show(baseQuery);
-
-                // Veritabanından sorguyu çalıştır ve sonuçları DataGridView'e aktar
                 DataTable dt = Con.GetData(baseQuery);
 
+                // Eğer veri yoksa kullanıcıyı bilgilendirin
+                if (dt.Rows.Count == 0)
+                {
+                    MessageBox.Show("Sefer tablosunda görüntülenecek veri bulunamadı.");
+                }
+                else
+                {
+                    // DataGridView'e veri bağlayın
+                    YolcularDgv.DataSource = dt;
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Bir hata oluştu: {ex.Message}");
             }
         }
-        private void OtobusCmb_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            YolculariFiltrele(); // Otobus seçimi değiştiğinde filtreleme yap
-        }
 
-        private void NeredenCmb_TextChanged(object sender, EventArgs e)
-        {
-            YolculariFiltrele(); // Nereden metni değiştiğinde filtreleme yap
-        }
-
-        private void NereyeCmb_TextChanged(object sender, EventArgs e)
-        {
-            YolculariFiltrele(); // Nereye metni değiştiğinde filtreleme yap
-        }
-
-        private void SeferSaatCmb_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            YolculariFiltrele(); // Sefer saati değiştiğinde filtreleme yap
-        }
-
-        private void STarihDtp_ValueChanged(object sender, EventArgs e)
-        {
-            YolculariFiltrele(); // Tarih değiştiğinde filtreleme yap
-        }
         private void YolcularDgv_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
         {
 
@@ -164,7 +121,6 @@ namespace OtobusYonetimi
             {
                 int selectedSeferID = Convert.ToInt32(YolcularDgv.SelectedRows[0].Cells["SEKod"].Value);
 
-                // Gerekli bilgileri form bileşenlerinden al
                 string yeniSaat = SeferSaatCmb.Text;
                 string yeniNereden = NeredenCmb.Text;
                 string yeniNereye = NereyeCmb.Text;
@@ -172,27 +128,58 @@ namespace OtobusYonetimi
 
                 if (string.IsNullOrEmpty(yeniSaat) || string.IsNullOrEmpty(yeniNereden) || string.IsNullOrEmpty(yeniNereye))
                 {
-                    MessageBox.Show("Lütfen tüm alanları doldurun!");
+                    MessageBox.Show("Lütfen tüm alanları doldurun!", "Eksik Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 try
                 {
-                    string query = "UPDATE SeferTbl SET Sefer_Saat = '{0}', Sefer_Tarih = '{1}', Nereden = '{2}', Nereye = '{3}' WHERE SEKod = {4}";
-                    query = string.Format(query, yeniSaat, yeniTarih.ToString("yyyy-MM-dd"), yeniNereden, yeniNereye, selectedSeferID);
+                    string query = @"UPDATE SeferTbl 
+                             SET Sefer_Saat = @SeferSaat, 
+                                 Sefer_Tarih = @SeferTarih, 
+                                 Nereden = @Nereden, 
+                                 Nereye = @Nereye 
+                             WHERE SEKod = @SEKod";
 
-                    Con.setData(query);
-                    MessageBox.Show("Sefer güncellendi!");
-                    YolculariFiltrele(); // Sefer listesi güncellenir
+                    SqlParameter[] parameters = new SqlParameter[]
+                    {
+                new SqlParameter("@SeferSaat", yeniSaat),
+                new SqlParameter("@SeferTarih", yeniTarih),
+                new SqlParameter("@Nereden", yeniNereden),
+                new SqlParameter("@Nereye", yeniNereye),
+                new SqlParameter("@SEKod", selectedSeferID)
+                    };
+
+                    int affectedRows = Con.setData(query, parameters);  // ExecuteCommand yerine setData kullanılıyor
+
+                    if (affectedRows > 0)
+                    {
+                        MessageBox.Show("Sefer başarıyla güncellendi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        YolculariFiltrele(); // Listeyi güncelle
+                    }
+                    else
+                    {
+                        MessageBox.Show("Güncelleme işlemi başarısız oldu!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Bir hata oluştu: {ex.Message}");
+                    MessageBox.Show($"Güncelleme sırasında bir hata oluştu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
-                MessageBox.Show("Lütfen güncellemek istediğiniz bir sefer seçin!");
+                MessageBox.Show("Lütfen güncellemek istediğiniz bir sefer seçin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+
+        }
+        public void SetCommand(SqlCommand cmd)
+        {
+            using (cmd.Connection)
+            {
+                cmd.Connection.Open();
+                cmd.ExecuteNonQuery();
             }
         }
 
@@ -208,7 +195,7 @@ namespace OtobusYonetimi
                     try
                     {
                         string query = $"DELETE FROM SeferTbl WHERE SEKod = {selectedSeferID}";
-                        Con.setData(query);
+                        Con.GetData(query);
                         MessageBox.Show("Sefer silindi!");
                         YolculariFiltrele(); // Listeyi günceller
                     }

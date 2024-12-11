@@ -9,6 +9,7 @@ namespace Otobilet
 {
     internal class Fonksiyonlar
     {
+        private readonly string connectionString;
         SqlConnection Con;
         SqlDataAdapter Sda;
         DataTable dt;
@@ -17,39 +18,64 @@ namespace Otobilet
 
         public Fonksiyonlar()
         {
+            connectionString = @"Data Source=DESKTOP-LDVGBVA\SQLEXPRESS;Initial Catalog=OtobiletDb;Integrated Security=True;";
             ConStr = @"Data Source=DESKTOP-LDVGBVA\SQLEXPRESS;Initial Catalog=OtobiletDb;Integrated Security=True;";
             Con = new SqlConnection(ConStr);
             cmd = new SqlCommand();
             cmd.Connection = Con;
         }
 
-        // Sql bağlantısını kapatma
-        public DataTable GetData(string Query)
+        private SqlConnection GetConnection()
+        {
+            SqlConnection conn = new SqlConnection(connectionString);
+            if (conn.State == ConnectionState.Closed)
+            {
+                conn.Open();
+            }
+            return conn;
+        }
+
+        // Veri çekme metodu
+        public DataTable GetData(string query, SqlParameter[] parameters = null)
         {
             using (SqlConnection con = new SqlConnection(ConStr))
             {
-                using (SqlDataAdapter sda = new SqlDataAdapter(Query, con))
+                using (SqlDataAdapter sda = new SqlDataAdapter(query, con))
                 {
+                    if (parameters != null)
+                    {
+                        sda.SelectCommand.Parameters.AddRange(parameters);  // Parametreleri ekliyoruz
+                    }
+
                     DataTable dt = new DataTable();
-                    sda.Fill(dt);
+                    sda.Fill(dt);  // Veriyi alıyoruz
                     return dt;
                 }
             }
         }
 
-        public int setData(string Query)
+        // Veri ekleme/güncelleme/silme metodu
+        public int setData(string query, SqlParameter[] parameters = null)
         {
             int Cnt = 0;
-            if (Con.State == ConnectionState.Closed)
+            using (SqlConnection con = new SqlConnection(ConStr))
             {
-                Con.Open();
-            }
-            cmd.CommandText = Query;
-            Cnt = cmd.ExecuteNonQuery();
-            Con.Close();
-            return Cnt;
+                SqlCommand cmd = new SqlCommand(query, con);
 
+                // Parametre ekleme
+                if (parameters != null)
+                {
+                    cmd.Parameters.AddRange(parameters);  // Parametreleri ekliyoruz
+                }
+
+                con.Open();
+                Cnt = cmd.ExecuteNonQuery();  // ExecuteNonQuery, SQL sorgusunun etkilenen satır sayısını döndürür
+                con.Close();
+            }
+            return Cnt;
         }
+
+        // SQL sorgusu çalıştırma
         public void ExecuteQuery(string query)
         {
             using (SqlConnection con = new SqlConnection(ConStr))
@@ -59,8 +85,9 @@ namespace Otobilet
                 {
                     cmd.ExecuteNonQuery();
                 }
-                // using bloğu dışında SQL bağlantısı otomatik olarak kapanır.
             }
         }
+
+
     }
 }

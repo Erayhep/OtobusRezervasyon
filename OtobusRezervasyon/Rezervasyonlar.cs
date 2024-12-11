@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -15,17 +16,32 @@ namespace Otobilet
         public Rezervasyonlar()
         {
             InitializeComponent();
+            Con = new Fonksiyonlar();
             this.FormClosing += new FormClosingEventHandler(this.Rezervasyonlar_FormClosing);
         }
+        Fonksiyonlar Con;
 
         private void label9_Click(object sender, EventArgs e)
         {
 
         }
+        private void LoadAllRezervasyonlar()
+        {
+            try
+            {
+                string query = "SELECT SeferID, KoltukNo, Isim, Telefon, Cinsiyet FROM RezervasyonTbl";
+                DataTable dt = Con.GetData(query);
+                rezervasyonlarDvg.DataSource = dt;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Veri yüklenirken bir hata oluştu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         private void Rezervasyonlar_Load(object sender, EventArgs e)
         {
-
+            LoadAllRezervasyonlar();
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
@@ -64,9 +80,6 @@ namespace Otobilet
         }
         private void Rezervasyonlar_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // Burada uygulama kapanmadan önce yapılacak işlemleri ekleyebilirsiniz
-            // Örneğin, kullanıcıdan onay almak için bir MessageBox ekleyebiliriz:
-
             DialogResult result = MessageBox.Show("Uygulamayı kapatmak istediğinizden emin misiniz?", "Kapat", MessageBoxButtons.YesNo);
             if (result == DialogResult.No)
             {
